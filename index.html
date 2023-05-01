@@ -8,18 +8,19 @@
         <!-- Babylon.js -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
         <script src="https://assets.babylonjs.com/generated/Assets.js"></script>
-        <script src="https://preview.babylonjs.com/ammo.js"></script>
-        <script src="https://preview.babylonjs.com/cannon.js"></script>
-        <script src="https://preview.babylonjs.com/Oimo.js"></script>
-        <script src="https://preview.babylonjs.com/earcut.min.js"></script>
-        <script src="https://preview.babylonjs.com/babylon.js"></script>
-        <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
-        <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
-        <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
-        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
-        <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
-        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
-        <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+        <script src="https://cdn.babylonjs.com/ammo.js"></script>
+        <script src="https://cdn.babylonjs.com/havok/HavokPhysics_umd.js"></script>
+        <script src="https://cdn.babylonjs.com/cannon.js"></script>
+        <script src="https://cdn.babylonjs.com/Oimo.js"></script>
+        <script src="https://cdn.babylonjs.com/earcut.min.js"></script>
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://cdn.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://cdn.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://cdn.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
 
         <style>
             html, body {
@@ -62,125 +63,397 @@
         var createScene = async function () {
     // This creates a basic Babylon Scene object (non-mesh)
     var scene = new BABYLON.Scene(engine);
-
+    
     // This creates and positions a free camera (non-mesh)
-    var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 2, -10), scene);
-
-    // Creating Env for XR
-    var env = scene.createDefaultEnvironment();
-
+    var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+    
     // This targets the camera to scene origin
     camera.setTarget(BABYLON.Vector3.Zero());
-
+    
     // This attaches the camera to the canvas
     camera.attachControl(canvas, true);
-
+    
     // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-    var light = new BABYLON.DirectionalLight("light", new BABYLON.Vector3(0, -0.5, 1.0), scene);
-    light.position = new BABYLON.Vector3(0, 5, -6);
-    // Enable Physics
-    scene.enablePhysics(undefined, new BABYLON.CannonJSPlugin(undefined, 80));
-
-    //Shadows
-    //const shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
-    //shadowGenerator.useBlurExponentialShadowMap = true;
-    //shadowGenerator.blurKernel = 32;
-
-
-    // Our built-in 'sphere' shape.
-    const sphere = BABYLON.MeshBuilder.CreateSphere("grab_sphere", {diameter: 1, segments: 32}, scene);
-    sphere.isPickable = true;
-    // Move the sphere upward 1/2 its height
-    sphere.position.y = 1;
-    sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor, { 
-        mass: 0, 
-        restitution: 0.5
-        });
-
-
-    const sphere2 = BABYLON.MeshBuilder.CreateSphere("grab_sphere", {diameter: 1, segments: 32}, scene);
-    sphere2.isPickable = true;
-    // Move the sphere upward 1/2 its height
-    sphere2.position.x = 2;
-    sphere2.position.y = 1;
-    sphere2.physicsImpostor = new BABYLON.PhysicsImpostor(sphere2, BABYLON.PhysicsImpostor.SphereImpostor, { 
-        mass: 0, 
-        restitution: 0.5
-        });
-
-    // Our built-in 'ground' shape.
-    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 30, height: 30, disableBidirectionalTransformation: true }, scene);
-    const groundMaterial = new BABYLON.GridMaterial("groundMaterial", scene);
-    ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, {
-        mass: 0,
-        restitution: 0.5,
-        friction: 0.7
-    });
-    groundMaterial.gridRatio = 0.1;
-    groundMaterial.opacity = 0.9;
-    groundMaterial.lineColor = "#fc0324";
-    ground.material = groundMaterial;
-
-
-    // Start XR
-
-    // Starting XR-Helper
+    var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+    
+    // Default intensity is 1. Let's dim the light a small amount
+    light.intensity = 0.7;
+    
+    // Built-in 'ground' shape.
+    var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 30, height: 30}, scene);
+    ground.position.y = -1;
+      // Creating ground material
+        var groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
+        groundMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+        ground.material = groundMaterial;
+          // remove ground flickering
+        groundMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+        
+    
+    // Highlight layer
+    var hl = new BABYLON.HighlightLayer("hl1", scene);
+    
+    // Generate Environment for WebXR
+    var env = scene.createDefaultEnvironment();
+    
+    // DEBUG - Show axes
+    new BABYLON.AxesViewer(scene, 1);
+    
+    // Enable WebXR and create xr helper
     const xrHelper = await scene.createDefaultXRExperienceAsync({floorMeshes: [env.ground]});
     const featureManager = xrHelper.baseExperience.featuresManager;
-    featureManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
-        xrInput: xrHelper.input,
-    }, true, false);
+    // Check for latest hand tracking feature
+    featureManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", { xrInput: xrHelper.input }, true, false);
+    
 
-    // Control: Grabbing-Logic
-
-    var currentlyGrabbing = (grabbing, controller) => {
-        if (grabbing) {
-            var grabable = scene.getMeshesById("grab_sphere");
-            grabable.forEach((d) =>{
-                if (d.intersectsMesh(controller)){
-                    d.setParent(controller);
-                }
-            });
-        } else {
-            var grabable = scene.getMeshesById("grab_sphere");
-            grabable.forEach((d) => {
-                if (d.parent == controller) {
-                    d.setParent(null);
-                }
-            })
-        }
+    class RotationAxis {
+        constructor(component) { this.component = component; }
+        getComponent() { return this.component; }
     }
-
-    // Control: Grabbing, execute via Squeeze
-
-    xrHelper.input.onControllerAddedObservable.add((controller) => {
-        controller.onMeshLoadedObservable.addOnce((rootMesh) => {
-            //shadowGenerator.addShadowCaster(rootMesh, true);
-        });
-        controller.onMotionControllerInitObservable.add(() => {
-            const squeeze = controller.motionController.getComponentOfType("squeeze");
-            [squeeze].forEach((component) => {
-                if (!component) {
-                    return;
-                }
-                component.onButtonStateChangedObservable.add(() => {
-                    if (component.changes.pressed){
-                        currentlyGrabbing(component.pressed, controller.pointer);
+    RotationAxis.Pitch = new RotationAxis('x');
+    RotationAxis.Yaw = new RotationAxis('y');
+    RotationAxis.Roll = new RotationAxis('z');
+    class RubicsCube {
+        constructor(options){
+            this.sideMeshToCube = new Map();
+            this.materialToSideMesh = new Map();
+            this.animatingCubes = new Set()
+            this.size = options.size;
+            this.cubes = [];
+            this.center;
+            this.transformNode = new BABYLON.TransformNode("", scene);
+            this.createCube();
+    
+        }
+        createCube() {
+     
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    for (let k = 0; k < 3; k++) {
+                        var cube = BABYLON.MeshBuilder.CreateBox("smallRubicsBox", {size: 1}, scene);
+                        cube.position.x = i;
+                        cube.position.y = j;
+                        cube.position.z = k;
+                        this.cubes.push(cube);
+                        cube.parent = this.transformNode;
                     }
-                })
-            })
-        });
+                }
+            }
+            // Colouring the cubes
+            [
+                // Plane-faces for rubiks cube
+                {Color: new BABYLON.Color3(1, 0, 0), Position: new BABYLON.Vector3(0, 1, 0), Rotation: new BABYLON.Vector3(Math.PI / 2, 0, 0)},
+                {Color: new BABYLON.Color3(0, 1, 0), Position: new BABYLON.Vector3(0, -1, 0), Rotation: new BABYLON.Vector3(-Math.PI / 2, 0, 0)},
+                {Color: new BABYLON.Color3(0, 0, 1), Position: new BABYLON.Vector3(1, 0, 0), Rotation: new BABYLON.Vector3(0,-Math.PI / 2, 0)},
+                {Color: new BABYLON.Color3(1, 1, 0), Position: new BABYLON.Vector3(-1, 0, 0), Rotation: new BABYLON.Vector3(0, Math.PI / 2, 0)},
+                {Color: new BABYLON.Color3(1, 0, 1), Position: new BABYLON.Vector3(0, 0, 1), Rotation: new BABYLON.Vector3(Math.PI, 0, 0)},
+                {Color: new BABYLON.Color3(1, 1, 1), Position: new BABYLON.Vector3(0, 0, -1), Rotation: new BABYLON.Vector3(0, 0, 0)},
+            ].forEach(detail => {
+                // Erstelle Material für die Plane
+                var material = new BABYLON.StandardMaterial("material", scene);
+                material.emissiveColor = detail.Color;
+                //material.disableLighting = true;
+                this.materialToSideMesh.set(material, []);
+                var tempPlane = BABYLON.MeshBuilder.CreatePlane("plane", {width: .98, height: .98}, scene);
+                tempPlane.material = material;
+                tempPlane.isVisible = false;
+                tempPlane.isPickable = false;
+                this.cubes
+                    // Github Co-pilot magic, sollte die Cubes einer Plane zurückgeben, dadurch werden auf einer Seite keine 2 Farben erzeugt
+                    .filter(cube => !this.cubes.some(cube2 => cube2.position.equals(cube.position.add(detail.Position))))
+                    .forEach(cube => {
+                        var plane = tempPlane.createInstance("");
+                        plane.parent = cube;
+                        plane.isVisible = true;
+                        plane.isPickable = true;
+                        plane.position = detail.Position.scale(0.501).clone();
+                        plane.rotation = detail.Rotation.clone();
+                        // Damit wenn wir auf die Plane klicken, der Cube ausgewählt werden kann
+                        this.sideMeshToCube.set(plane, cube);
+                        
+                        
+                        
+                        //this.materialToSideMesh.get(material).push(plane);
+                    });
+                });
+    
+        }
+        getCubes(){
+            return this.cubes;
+        }
+        calculateCenter(){
+            var center = new BABYLON.Vector3(0,0,0);
+            for (let i = 0; i < this.cubes.length; i++) {
+                center.addInPlace(this.cubes[i].position);
+            }
+            center.scaleInPlace(1/this.cubes.length);
+            this.center = center;
+        }
+        getTransformNode() { return this.transformNode; }
+        getCenter(){
+            return this.center;
+        }
+        relativeToMe(vector){
+            // Github Co-pilot magic
+            return BABYLON.Vector3.TransformCoordinates(vector, this.transformNode.getWorldMatrix().clone().invert());
+        }
+        rotate(axis, rows, direction, animateSpeed){
+            //console.log("Called rotate with: " + axis + " " + rows + " " + direction + " " + animateSpeed + "")
+            // Wenn animateSpeed nicht gesetzt ist, dann setze es auf 1
+            animateSpeed = animateSpeed === undefined ? 1 : animateSpeed;
+            var cubesToRotate = this.cubes
+                // cube ist noch nicht in unserer animatingCubes Liste, aka Warteschleife
+                .filter(cube => !this.animatingCubes.has(cube))
+                .filter((cube) => {
+                    var relativePosition = cube.position;
+                    switch(axis){
+                        // Filtern ob Cubes auf gegebener Achse sind und daher rotiert werden müssen 
+                        case RotationAxis.Roll: return relativePosition.z == rows;
+                        case RotationAxis.Yaw: return relativePosition.y == rows;
+                        case RotationAxis.Pitch: return relativePosition.x == rows;
+                    }
+                });
+                // Füge die Cubes zu unserer Warteschleife hinzu
+                cubesToRotate.forEach(cube => this.animatingCubes.add(cube));
+                //console.log(this.animatingCubes)
+                // Erstelle TransformNode für die Rotation
+                var tempTransformnode = new BABYLON.TransformNode("tempTransformnode");
+                // Berechne Rotation in Radians
+                if (direction == false) direction = -1;
+                var rotationInRadians = direction * Math.PI / 2;
+                // Positioniere anhand gegebener Achse
+                tempTransformnode.position = new BABYLON.Vector3(axis == RotationAxis.Pitch ? rows : 0, axis == RotationAxis.Yaw ? rows : 0, axis == RotationAxis.Roll ? rows : 0);
+                // Falls Cubes bewegt worden sind, addiere die Centercoordinaten zu unserem berechneten Achsenoffset
+                tempTransformnode.position.addInPlace(this.center);
+                tempTransformnode.parent = this.transformNode;
+                // Füge die Cubes zu unserem TransformNode hinzu
+                cubesToRotate.forEach(cube => cube.setParent(tempTransformnode));
+                // Erstelle Animation
+                var animation = BABYLON.Animation.CreateAndStartAnimation('', tempTransformnode, `rotation.${axis.getComponent()}`, 60, 15 / animateSpeed, 0, rotationInRadians, 0);
+                // Setzen von was am Ende der Animation erreicht werden soll
+                animation.onAnimationEnd= () => {
+                    //console.log("in onAnimationEnd")
+                    // Entfenre der Parents aus den Cubes  
+                    cubesToRotate.forEach((cube) => {
+                        cube.setParent(this.transformNode);
+                        // Runden der Positionen um Floating Point Error zu vermeiden
+                        cube.position.set(Math.round(cube.position.x), Math.round(cube.position.y), Math.round(cube.position.z));
+                        cube.rotation.set(Math.round(cube.rotation.x / (Math.PI / 2)) * (Math.PI / 2), Math.round(cube.rotation.y / (Math.PI / 2)) * (Math.PI / 2), Math.round(cube.rotation.z / (Math.PI / 2)) * (Math.PI / 2));
+                    });
+                    // Entferne den TransformNode
+                    tempTransformnode.dispose();
+                    // Entferne die Cubes aus der Warteschleife
+                    cubesToRotate.forEach(cube => this.animatingCubes.delete(cube));
+                    
+                }
+                return true;
+            }
+            
+        
+    }
+    
+    var rubicsCube = new RubicsCube({size: 3});
+    rubicsCube.calculateCenter();
+
+    
+    var lefthand = new BABYLON.TransformNode("lefthand", scene);
+    var righthand = new BABYLON.TransformNode("righthand", scene);
+
+    // Get pointer to WebXR Controller meshs
+    xrHelper.input.onControllerAddedObservable.add((controller) => {
+        if (controller.inputSource.handedness == "left") {
+            lefthand.parent = controller.pointer;
+            //lefthand.position = new BABYLON.Vector3(0,0,0);
+            //lefthand.rotationQuaternion = new BABYLON.Quaternion(0,0,0,0);
+            lefthand.scaling = new BABYLON.Vector3(1,1,1);
+            lefthand.isVisible = true;
+        }
+        if (controller.inputSource.handedness == "right") {
+            righthand.parent = controller.pointer;
+            //righthand.position = new BABYLON.Vector3(0,0,0);
+            //righthand.rotationQuaternion = new BABYLON.Quaternion(0,0,0,0);
+            righthand.scaling = new BABYLON.Vector3(1,1,1);
+            righthand.isVisible = true;
+        }
     });
 
-        
-    // XR-Loop per XR-Frame
-  
+
+
+
+    
+    
+    
+    // Control via Webbrowser Mouseclicks
+    var firstpick = null;
+    var eulerangles;
+    var startAngleInEuler;
+    var currentAngleInEuler;
+    var schwellenWert = 0.5; // Dabei Schweller von einer viertel Umdrehung
+    var rotationsModifier = 1; // Um eine Umdrehung evnt zu verstärken, bzw zu schwächen
+    scene.onPointerObservable.add((pointerEvent) => {
+        switch(pointerEvent.type){
+            // Pointer (Mouseclick) down
+            case BABYLON.PointerEventTypes.POINTERDOWN:
+                // Kriege das erste Mesh, das angeklickt wurde
+    
+                // Attempt via XR.js approach
+                var pickResult = pointerEvent.pickInfo;
+                if (pickResult.hit) {
+                    firstpick = pickResult.pickedMesh;
+                }
+                if (typeof righthand != undefined)
+                {
+                    righthand.getWorldMatrix().getTranslation()
+                    console.log("Updating StartAngle")
+                    //console.log("Righthand: ", righthand)
+                    //console.log("Righthand rotationQuaternion: ", righthand.rotationQuaternion )
+                    startAngleInEuler = righthand.absoluteRotationQuaternion.toEulerAngles()
+                    console.log("STARTANGLE: ", startAngleInEuler)
+                    //console.log("Righthand eulerangles: ", startAngleInEuler)
+                    console.log(righthand.getWorldMatrix().getTranslation())
+
+                }
+                
+                ////console.log(firstpick.position)
+                ////console.log(rubicsCube.sideMeshToCube.get(firstpick).position)
+                // Commenty out for XR.js approach
+               // firstpick = scene.pick(scene.pointerX, scene.pointerY).pickedMesh;
+    
+    
+                ////console.log(scene.);
+                //camera.detachControl(canvas);
+                // Debug-log
+                ////console.log("Clicked side: ", clickedSide_position);
+                ////console.log("Location of pickedMesh: ", firstpick.position);
+                ////console.log(firstpick.name);
+                ////console.log("Current Rotation: ", firstpick.rotation.y);
+                ////console.log("ClickedSide: ", clickedSide)
+    
+    
+                break;
+    
+            // Pointer (Mouseclick) let go
+            case BABYLON.PointerEventTypes.POINTERUP:
+                // Wurde nur geklickt, aber kein 2tes Cube ausgewählt durch dragging, -> Reset
+                firstpick = null;
+                //currentAngleInEuler = undefined
+                console.log("CANCELLED")
+                //camera.attachControl(canvas);
+                break;
+                
+            // Pointer (mouse) movement 
+            case BABYLON.PointerEventTypes.POINTERMOVE:
+                currentAngleInEuler = righthand.absoluteRotationQuaternion.toEulerAngles();
+                if (firstpick) {
+                    if (firstpick != null && rubicsCube.sideMeshToCube.has(firstpick)) {
+                        console.log("entererd secondpick")
+                        console.log(currentAngleInEuler)
+                        console.log("Righthand  NEW eulerangles: ", currentAngleInEuler)
+                        //console.log("entererd secondpick big-if")
+                        //haben kein Blödsinn angeklickt, bzw haben zumindest "etwas" angeklickt    
+                        // Haben Sidemeshes von Cubes angeklickt
+                        
+                        // Durch klicken der Sidemeshes müssen wir immer zuerst den Cube durch sideMeshToCube herausfinden
+                        var cubePosition = rubicsCube.relativeToMe(rubicsCube.sideMeshToCube.get(firstpick).absolutePosition);
+                        //console.log("After: ", cubePosition);
+    
+                        // Runden just-in-case um Floating-Point-Errors zu vermeiden
+                        cubePosition.x = Math.round(cubePosition.x);
+                        cubePosition.y = Math.round(cubePosition.y);
+                        cubePosition.z = Math.round(cubePosition.z);
+
+                        // Update aktuelle Rotation
+                        righthand.getWorldMatrix().getTranslation()
+                        currentAngleInEuler = righthand.absoluteRotationQuaternion.toEulerAngles();
+                        console.log(currentAngleInEuler)
+                        console.log("Righthand  NEW eulerangles: ", currentAngleInEuler)
+                        var rotationDiff = currentAngleInEuler.subtract(startAngleInEuler)
+                        // Bestimme größte Rotation
+                        var maxRotation = Math.max(Math.abs(rotationDiff.x), Math.abs(rotationDiff.y), Math.abs(rotationDiff.z))
+                        // Speichere die Achse der größten Rotation
+                        var rotationAxis = maxRotation == Math.abs(rotationDiff.x) ? RotationAxis.Pitch : maxRotation == Math.abs(rotationDiff.y) ? RotationAxis.Yaw : RotationAxis.Roll
+                        // Restoriere (evnt) negative Werte für Rotation
+                        if (maxRotation * -1 == rotationDiff.x) maxRotation *= -1;
+                        if (maxRotation * -1 == rotationDiff.y) maxRotation *= -1;
+                        if (maxRotation * -1 == rotationDiff.z) maxRotation *= -1;
+                        console.log(Math.abs(maxRotation) > (Math.PI / 4) * schwellenWert)
+                        console.log("mit maxRotation: ", maxRotation)
+                        console.log("Aktuelle Rotation: ", currentAngleInEuler)
+                        // Wenn wir eine Rotation von mind. 50% einer viertiel Umdrehung feststellen, so rotieren wir den Cube
+                        if (Math.abs(maxRotation) > (Math.PI / 4) * schwellenWert){
+                            //debug
+                            console.log("currentAngleInEuler: ", currentAngleInEuler)
+                            console.log("startAngle: ", startAngleInEuler)
+                            console.log(rotationAxis, Math.floor(cubePosition[rotationAxis.getComponent()]), maxRotation > 0, maxRotation * rotationsModifier)
+                            rubicsCube.rotate(rotationAxis, Math.floor(cubePosition[rotationAxis.getComponent()]), maxRotation > 0, Math.abs(maxRotation * rotationsModifier));
+                            firstpick = null
+                        }
+
+
+                        /*
+
+
+                        for (let i = 0; i <= 1; i++){
+                            //console.log("in for loop")
+                            let positiveX = i == 0;
+                            // Wenn wir in die positive X-Richtung gedraggt haben, muss die Normale der planeEbene in die negative X-Richtung zeigen
+                            if (!(positiveX ? (planeNormal.x >= 0.5) : (planeNormal.x <= -0.5))){
+                                continue;
+                            }
+                            if (Math.abs(planeDiff.y) <= 0.1){
+                                // 
+                                //rubicsCube.rotate("y", Math.floor(cubePosition.y), positveX ? planeDiff.z < 0 : planeDiff.z > 0);
+                                rubicsCube.rotate(RotationAxis.Yaw, Math.floor(cubePosition.y), positiveX ? planeDiff.z < 0 : planeDiff.z > 0);
+                            } else {
+                                //rubicsCube.rotate("z", Math.floor(cubePosition.z), positveX ? planeDiff.y > 0 : planeDiff.y < 0);
+                                rubicsCube.rotate(RotationAxis.Roll, Math.floor(cubePosition.z), positiveX ? planeDiff.y > 0 : planeDiff.y < 0);
+                            }
+                        }
+                        for (let i = 0; i <= 1; i++){
+                            let positiveY = i == 0;
+                            if (!(positiveY ? (planeNormal.y >= 0.5) : (planeNormal.y <= -0.5))){
+                                continue;
+                            }
+                            if (Math.abs(planeDiff.x) <= 0.1){
+                                //rubicsCube.rotate("x", Math.floor(cubePosition.x), positveY ? planeDiff.z < 0 : planeDiff.z > 0);
+                                rubicsCube.rotate(RotationAxis.Pitch, Math.floor(cubePosition.x), positiveY ? planeDiff.z > 0 : planeDiff.z < 0);
+                            } else {
+                                //rubicsCube.rotate("z", Math.floor(cubePosition.z), positveY ? planeDiff.x > 0 : planeDiff.x < 0);
+                                rubicsCube.rotate(RotationAxis.Roll, Math.floor(cubePosition.z), positiveY ? planeDiff.x < 0 : planeDiff.x > 0);
+    
+                            }
+                        }
+                        for (let i = 0; i <= 1; i++){
+                            let positiveZ = i == 0;
+                            if (!(positiveZ ? (planeNormal.z >= 0.5) : (planeNormal.z <= -0.5))){
+                                continue;
+                            }
+                            if (Math.abs(planeDiff.y) <= 0.1){
+                                //rubicsCube.rotate("y", Math.floor(cubePosition.y), positveZ ? planeDiff.x < 0 : planeDiff.x > 0);
+                                rubicsCube.rotate(RotationAxis.Yaw, Math.floor(cubePosition.y), positiveZ ? planeDiff.x > 0 : planeDiff.x < 0);
+    
+                            } else {
+                                //rubicsCube.rotate("x", Math.floor(cubePosition.x), positveZ ? planeDiff.y > 0 : planeDiff.y < 0);
+                                rubicsCube.rotate(RotationAxis.Pitch, Math.floor(cubePosition.x), positiveZ ? planeDiff.y < 0 : planeDiff.y > 0);
+    
+                            }
+                        }
+                        */
+                        
+
+                break;
+            }
+        }
+        }
+    
+});
 
 
 
     return scene;
-};
+    };
                 window.initFunction = async function() {
+                    
                     
                     
                     var asyncEngineCreation = async function() {
