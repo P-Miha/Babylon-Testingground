@@ -335,7 +335,9 @@
             // Pointer (Mouseclick) let go
             case BABYLON.PointerEventTypes.POINTERUP:
                 // Wurde nur geklickt, aber kein 2tes Cube ausgewählt durch dragging, -> Reset
-                firstpick = null;
+                
+                // Disabled zum Vorzeigen 
+                //firstpick = null;
                 //currentAngleInEuler = undefined
                 console.log("CANCELLED")
                 //camera.attachControl(canvas);
